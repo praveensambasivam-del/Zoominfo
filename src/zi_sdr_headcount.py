@@ -142,11 +142,12 @@ def search_title(session, auth, throttle, company_id, title, args):
         payload = {
             "companyId": str(company_id),
             "jobTitle": title,
-            "country": args.country,
             "rpp": RPP,
             "page": page,
         }
-        if args.location_search_type:
+        if args.country:
+            payload["country"] = args.country
+        if args.country and args.location_search_type:
             payload["locationSearchType"] = args.location_search_type
         body = search_page(session, auth, throttle, payload)
         if reported_total is None:
@@ -201,9 +202,12 @@ def main():
     ap.add_argument("--detail", default="out/detail_by_title.csv")
     ap.add_argument("--checkpoint", default="out/checkpoint.jsonl")
     ap.add_argument("--country", default="United States")
-    ap.add_argument("--location-search-type", default="Person",
+    ap.add_argument("--location-search-type", default="PersonOrHQ",
                     help="Person | HQ | PersonOrHQ | PersonAndHQ | PersonThenHQ. "
-                         "'Person' counts contacts whose own location is in the US.")
+                         "'PersonOrHQ' (default) matches a contact whose own location "
+                         "is in the country OR whose company is headquartered there, so "
+                         "contacts based elsewhere still count. Pass --country '' to drop "
+                         "the location filter entirely.")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--rps", type=float, default=8.0, help="requests per second cap")
     ap.add_argument("--limit", type=int, default=0, help="only process first N companies")

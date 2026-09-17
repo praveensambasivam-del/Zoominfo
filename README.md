@@ -14,7 +14,10 @@ it issues one `POST /search/contact` per job title:
 - Sales Development Executive
 - Business Development Executive
 
-Each search is filtered to the United States and paginated to completion. Person IDs
+Each search is anchored to the United States via `locationSearchType=PersonOrHQ` — a
+contact counts if they are US-based **or** their company is US-headquartered, so
+contacts sitting outside the US at a US company are still included. Results are
+paginated to completion. Person IDs
 are pooled across the six titles and de-duplicated, so a contact whose title matches
 more than one term is counted once.
 
@@ -31,7 +34,8 @@ Useful flags:
 | flag | default | meaning |
 | --- | --- | --- |
 | `--limit N` | 0 (all) | process only the first N companies — use for a smoke test |
-| `--location-search-type` | `Person` | `Person` counts contacts whose own location is US; `PersonOrHQ` also counts contacts at US-headquartered companies |
+| `--location-search-type` | `PersonOrHQ` | matches a contact located in the US **or** working for a US-headquartered company. Use `Person` to require the contact themselves to be US-based |
+| `--country` | `United States` | pass `--country ""` to drop the location filter entirely |
 | `--workers` / `--rps` | 4 / 8.0 | concurrency and request-rate cap |
 
 ## Output
