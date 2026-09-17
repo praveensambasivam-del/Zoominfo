@@ -16,9 +16,7 @@ OUT = Path("out/sdr_bdr_headcount.csv")
 BATCH = 50
 
 # Most-specific first: a company matching several gets the first as its primary.
-PRECEDENCE = ["Salesforce", "HubSpot", "Microsoft Dynamics", "NetSuite CRM",
-              "SugarCRM", "Zoho CRM", "Pipedrive", "Freshsales", "Close",
-              "Copper", "Insightly", "Keap", "Zendesk Sell"]
+PRECEDENCE = ["Salesforce", "HubSpot", "Pipedrive", "Zoho CRM"]
 
 
 def companies():
@@ -55,15 +53,18 @@ def main():
         with OUT.open("w", newline="", encoding="utf-8") as fh:
             w = csv.writer(fh)
             w.writerow(["Company Name", "Company ID", "Company Domain",
-                        "SDR/BDR Headcount", "CRM", "All CRM Signals"])
+                        "SDR/BDR Headcount", "Salesforce", "HubSpot",
+                        "Pipedrive", "Zoho CRM", "CRM Signals"])
             for c in companies():
                 found = by_company.get(c["id"], [])
                 found.sort(key=lambda v: PRECEDENCE.index(v)
                            if v in PRECEDENCE else len(PRECEDENCE))
                 w.writerow([c["name"], c["id"], c.get("domain", ""),
-                            counts.get(c["id"], ""),
-                            found[0] if found else "Unknown",
-                            "; ".join(found)])
+                            counts.get(c["id"], "")]
+                           + ["Yes" if v in found else ""
+                              for v in ("Salesforce", "HubSpot",
+                                        "Pipedrive", "Zoho CRM")]
+                           + ["; ".join(found)])
         known = sum(1 for c in companies() if c["id"] in by_company)
         print(f"wrote {OUT}: {known}/{len(companies())} with a CRM identified")
         for v in PRECEDENCE:
